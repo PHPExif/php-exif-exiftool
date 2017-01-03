@@ -115,4 +115,37 @@ class DateTimeFieldMapperTest extends BaseFieldMapperTest
             );
         }
     }
+
+    /**
+     * @covers ::getValidKeys
+     * @group mapper
+     *
+     * @return void
+     */
+    public function testGetValidKeysReturnsArray()
+    {
+        $mapper = new $this->fieldMapperClass();
+        $this->assertInternalType(
+            'array',
+            $mapper->getValidKeys()
+        );
+    }
+
+    /**
+     * @covers ::setValidKeys
+     * @group mapper
+     *
+     * @return void
+     */
+    public function testSetValidKeysSetsCorrectData()
+    {
+        $mapper = new $this->fieldMapperClass();
+        $data = [
+            'foo', 'bar', 'baz',
+        ];
+
+        $this->assertNotEquals($data, $mapper->getValidKeys());
+        $mapper->setValidKeys($data);
+        $this->assertEquals($data, $mapper->getValidKeys());
+    }
 }

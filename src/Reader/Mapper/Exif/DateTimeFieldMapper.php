@@ -27,6 +27,38 @@ class DateTimeFieldMapper implements FieldMapper
     use GuardInvalidArgumentsForExifTrait;
 
     /**
+     * @var array
+     */
+    private $validKeys = [
+        'system:filemodifydate',
+        'composite:subsecdatetimeoriginal',
+        'composite:subsecmodifydate',
+        'exififd:datetimeoriginal',
+        'exififd:createdate',
+        'ifd0:modifydate',
+    ];
+
+    /**
+     * Getter for validKeys
+     *
+     * @return array
+     */
+    public function getValidKeys()
+    {
+        return $this->validKeys;
+    }
+
+    /**
+     * Setter for validKeys
+     *
+     * @param array $validKeys
+     */
+    public function setValidKeys(array $validKeys)
+    {
+        $this->validKeys = $validKeys;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function getSupportedFields()
@@ -43,16 +75,7 @@ class DateTimeFieldMapper implements FieldMapper
     {
         $this->guardInvalidArguments($field, $input, $output);
 
-        $validKeys = [
-            'system:filemodifydate',
-            'composite:subsecdatetimeoriginal',
-            'composite:subsecmodifydate',
-            'exififd:datetimeoriginal',
-            'exififd:createdate',
-            'ifd0:modifydate',
-        ];
-
-        while ($key = array_shift($validKeys)) {
+        foreach ($this->validKeys as $key) {
             if (!array_key_exists($key, $input)) {
                 continue;
             }
