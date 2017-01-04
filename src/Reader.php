@@ -9,7 +9,7 @@
  * @package     Exiftool
  */
 
-namespace PHPExif\Adapter\Native;
+namespace PHPExif\Adapter\Exiftool;
 
 use PHPExif\Common\Adapter\MapperInterface;
 use PHPExif\Common\Adapter\ReaderInterface;
@@ -31,6 +31,7 @@ final class Reader implements ReaderInterface
 {
     const PATH = 'path';
     const BIN = 'binary';
+    const NUMERIC = 'numeric';
 
     /**
      * @var MapperInterface
@@ -45,7 +46,7 @@ final class Reader implements ReaderInterface
     /**
      * @var bool
      */
-    private $numeric = true;
+    private $numeric;
 
     /**
      * @var string
@@ -62,11 +63,13 @@ final class Reader implements ReaderInterface
         $defaults = [
             self::BIN => 'exiftool',
             self::PATH => '/usr/bin/env',
+            self::NUMERIC => true,
         ];
         $config = array_replace($defaults, $config);
 
         $this->binary = $config[self::BIN];
         $this->path = $config[self::PATH];
+        $this->numeric = $config[self::NUMERIC];
 
         $this->mapper = $mapper;
     }
@@ -94,11 +97,12 @@ final class Reader implements ReaderInterface
             )
         );
 
-        $data = json_decode($result, true);
-
-        if (false === $data) {
+        if (false === $result) {
             throw NoExifDataException::fromFile($filePath);
         }
+
+        $data = json_decode($result, true)[0];
+        $data = $this->normalizeArrayKeys($data);
 
         // map the data:
         $mapper = $this->getMapper();
@@ -112,13 +116,37 @@ final class Reader implements ReaderInterface
     }
 
     /**
+     * Lowercases the keys for given array
+     *
+     * @param array $data
+     *
+     * @return array
+     */
+    private function normalizeArrayKeys(array $data)
+    {
+        $keys = array_keys($data);
+        $keys = array_map('strtolower', $keys);
+        $values = array_values($data);
+        $values = array_map(function ($value) {
+            if (!is_array($value)) {
+                return $value;
+            }
+
+            return $this->normalizeArrayKeys($value);
+        }, $values);
+
+        return array_combine(
+            $keys,
+            $values
+        );
+    }
+
+    /**
      * Returns the output from given cli command
      *
      * @param string $command
      *
-     * @throws RuntimeException If the command can't be executed
-     *
-     * @return string
+     * @return string|boolean
      */
     protected function getCliOutput($command)
     {
@@ -128,11 +156,11 @@ final class Reader implements ReaderInterface
             2 => array('pipe', 'a')
         );
         $process = proc_open($command, $descriptorspec, $pipes);
+
         if (!is_resource($process)) {
-            throw new RuntimeException(
-                'Could not open a resource to the exiftool binary'
-            );
+            return false;
         }
+
         $result = stream_get_contents($pipes[1]);
         fclose($pipes[0]);
         fclose($pipes[1]);
