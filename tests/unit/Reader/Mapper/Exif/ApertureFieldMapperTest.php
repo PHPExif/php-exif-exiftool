@@ -17,29 +17,28 @@ use PHPExif\Common\Data\ValueObject\Aperture;
 class ApertureFieldMapperTest extends BaseFieldMapperTest
 {
     /**
-     * FQCN of the fieldmapper being tested
-     *
-     * @var mixed
+     * {@inheritdoc}
      */
     protected $fieldMapperClass = ApertureFieldMapper::class;
 
     /**
-     * List of supported fields
-     *
-     * @var array
+     * {@inheritdoc}
      */
     protected $supportedFields = [
         Aperture::class,
     ];
 
     /**
-     * Valid input data
-     *
-     * @var array
+     * {@inheritdoc}
      */
     protected $validInput = [
         'composite:aperture' => 5.0,
     ];
+
+    /**
+     * {@inheritdoc}
+     */
+    protected $outputAccessor = 'getAperture';
 
     /**
      * @covers ::mapField
@@ -53,9 +52,9 @@ class ApertureFieldMapperTest extends BaseFieldMapperTest
         $output = new Exif;
         $mapper = new $this->fieldMapperClass();
 
-        $originalData = $output->getAperture();
+        $originalData = $output->{$this->outputAccessor}();
         $mapper->mapField($field, $this->validInput, $output);
-        $newData = $output->getAperture();
+        $newData = $output->{$this->outputAccessor}();
 
         $this->assertNotSame($originalData, $newData);
 

@@ -36,6 +36,14 @@ abstract class BaseFieldMapperTest extends \PHPUnit_Framework_TestCase
     protected $validInput = [];
 
     /**
+     * Which method should be used on the output to access the
+     * mapped data?
+     *
+     * @var string
+     */
+    protected $outputAccessor;
+
+    /**
      * @covers ::getSupportedFields
      * @group mapper
      *
@@ -133,5 +141,48 @@ abstract class BaseFieldMapperTest extends \PHPUnit_Framework_TestCase
             $originalHash,
             $newHash
         );
+    }
+
+    /**
+     * @covers ::mapField
+     * @group mapper
+     *
+     * @return void
+     */
+    public function testMapFieldTraversesSetOfKeys()
+    {
+        $field = reset($this->supportedFields);
+        $output = new Exif;
+        $mapper = new $this->fieldMapperClass();
+
+        $keys = array_keys($this->validInput);
+        foreach ($this->validInput as $key => $value) {
+            unset($this->validInput[$key]);
+            array_shift($keys);
+
+            if (count($keys) === 0) {
+                break;
+            }
+
+            $newKey = $keys[0];
+
+            $originalData = $output->{$this->outputAccessor}();
+            $mapper->mapField($field, $this->validInput, $output);
+            $newData = $output->{$this->outputAccessor}();
+
+            $this->assertNotSame($originalData, $newData);
+
+            if (null !== $originalData) {
+                $this->assertInstanceOf(
+                    get_class($originalData),
+                    $newData
+                );
+            }
+
+            $this->assertEquals(
+                $this->validInput[$newKey],
+                $newData
+            );
+        }
     }
 }

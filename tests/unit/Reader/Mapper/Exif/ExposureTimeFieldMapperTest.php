@@ -17,30 +17,29 @@ use PHPExif\Common\Data\ValueObject\ExposureTime;
 class ExposureTimeFieldMapperTest extends BaseFieldMapperTest
 {
     /**
-     * FQCN of the fieldmapper being tested
-     *
-     * @var mixed
+     * {@inheritdoc}
      */
     protected $fieldMapperClass = ExposureTimeFieldMapper::class;
 
     /**
-     * List of supported fields
-     *
-     * @var array
+     * {@inheritdoc}
      */
     protected $supportedFields = [
         ExposureTime::class,
     ];
 
     /**
-     * Valid input data
-     *
-     * @var array
+     * {@inheritdoc}
      */
     protected $validInput = [
         'exififd:exposuretime' => '1/60',
         'composite:shutterspeed' => '1/80',
     ];
+
+    /**
+     * {@inheritdoc}
+     */
+    protected $outputAccessor = 'getExposureTime';
 
     /**
      * @covers ::mapField
@@ -54,9 +53,9 @@ class ExposureTimeFieldMapperTest extends BaseFieldMapperTest
         $output = new Exif;
         $mapper = new $this->fieldMapperClass();
 
-        $originalData = $output->getExposureTime();
+        $originalData = $output->{$this->outputAccessor}();
         $mapper->mapField($field, $this->validInput, $output);
-        $newData = $output->getExposureTime();
+        $newData = $output->{$this->outputAccessor}();
 
         $this->assertNotSame($originalData, $newData);
 
@@ -69,79 +68,5 @@ class ExposureTimeFieldMapperTest extends BaseFieldMapperTest
             $this->validInput['exififd:exposuretime'],
             $newData
         );
-    }
-
-    /**
-     * @covers ::mapField
-     * @group mapper
-     *
-     * @return void
-     */
-    public function testMapFieldTraversesSetOfKeys()
-    {
-        $field = reset($this->supportedFields);
-        $output = new Exif;
-        $mapper = new $this->fieldMapperClass();
-
-        $keys = array_keys($this->validInput);
-        foreach ($this->validInput as $key => $value) {
-            unset($this->validInput[$key]);
-            array_shift($keys);
-
-            if (count($keys) === 0) {
-                break;
-            }
-
-            $newKey = $keys[0];
-
-            $originalData = $output->getExposureTime();
-            $mapper->mapField($field, $this->validInput, $output);
-            $newData = $output->getExposureTime();
-
-            $this->assertNotSame($originalData, $newData);
-
-            $this->assertInstanceOf(
-                ExposureTime::class,
-                $newData
-            );
-
-            $this->assertEquals(
-                $this->validInput[$newKey],
-                $newData
-            );
-        }
-    }
-
-    /**
-     * @covers ::getValidKeys
-     * @group mapper
-     *
-     * @return void
-     */
-    public function testGetValidKeysReturnsArray()
-    {
-        $mapper = new $this->fieldMapperClass();
-        $this->assertInternalType(
-            'array',
-            $mapper->getValidKeys()
-        );
-    }
-
-    /**
-     * @covers ::setValidKeys
-     * @group mapper
-     *
-     * @return void
-     */
-    public function testSetValidKeysSetsCorrectData()
-    {
-        $mapper = new $this->fieldMapperClass();
-        $data = [
-            'foo', 'bar', 'baz',
-        ];
-
-        $this->assertNotEquals($data, $mapper->getValidKeys());
-        $mapper->setValidKeys($data);
-        $this->assertEquals($data, $mapper->getValidKeys());
     }
 }

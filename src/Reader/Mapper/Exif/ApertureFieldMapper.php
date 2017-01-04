@@ -20,11 +20,21 @@ use PHPExif\Common\Mapper\GuardInvalidArgumentsForExifTrait;
  * Mapper
  *
  * @category    PHPExif
- * @package     Common
+ * @package     Exiftool
  */
 class ApertureFieldMapper implements FieldMapper
 {
     use GuardInvalidArgumentsForExifTrait;
+    use ValidKeysTrait;
+
+    /**
+     * @var array
+     */
+    private $validKeys = [
+        'composite:aperture',
+        'exififd:fnumber',
+        'exififd:aperturevalue',
+    ];
 
     /**
      * {@inheritDoc}
@@ -43,14 +53,13 @@ class ApertureFieldMapper implements FieldMapper
     {
         $this->guardInvalidArguments($field, $input, $output);
 
-        if (!array_key_exists('composite:aperture', $input)) {
-            return;
+        foreach ($this->validKeys as $key) {
+            if (!array_key_exists($key, $input)) {
+                continue;
+            }
+
+            $aperture = new Aperture($input[$key]);
+            $output = $output->withAperture($aperture);
         }
-
-        $aperture = new Aperture(
-            $input['composite:aperture']
-        );
-
-        $output = $output->withAperture($aperture);
     }
 }

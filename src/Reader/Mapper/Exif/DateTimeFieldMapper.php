@@ -20,11 +20,12 @@ use \DateTimeImmutable;
  * Mapper
  *
  * @category    PHPExif
- * @package     Common
+ * @package     Exiftool
  */
 class DateTimeFieldMapper implements FieldMapper
 {
     use GuardInvalidArgumentsForExifTrait;
+    use ValidKeysTrait;
 
     /**
      * @var array
@@ -37,26 +38,6 @@ class DateTimeFieldMapper implements FieldMapper
         'exififd:createdate',
         'ifd0:modifydate',
     ];
-
-    /**
-     * Getter for validKeys
-     *
-     * @return array
-     */
-    public function getValidKeys()
-    {
-        return $this->validKeys;
-    }
-
-    /**
-     * Setter for validKeys
-     *
-     * @param array $validKeys
-     */
-    public function setValidKeys(array $validKeys)
-    {
-        $this->validKeys = $validKeys;
-    }
 
     /**
      * {@inheritDoc}

@@ -17,25 +17,19 @@ use \DateTimeImmutable;
 class DateTimeFieldMapperTest extends BaseFieldMapperTest
 {
     /**
-     * FQCN of the fieldmapper being tested
-     *
-     * @var mixed
+     * {@inheritdoc}
      */
     protected $fieldMapperClass = DateTimeFieldMapper::class;
 
     /**
-     * List of supported fields
-     *
-     * @var array
+     * {@inheritdoc}
      */
     protected $supportedFields = [
         DateTimeImmutable::class,
     ];
 
     /**
-     * Valid input data
-     *
-     * @var array
+     * {@inheritdoc}
      */
     protected $validInput = [
         'system:filemodifydate' => '2016-11-17 20:00:00',
@@ -45,6 +39,11 @@ class DateTimeFieldMapperTest extends BaseFieldMapperTest
         'exififd:createdate' => '2016-11-17 20:04:00',
         'ifd0:modifydate' => '2016-11-17 20:05:00',
     ];
+
+    /**
+     * {@inheritdoc}
+     */
+    protected $outputAccessor = 'getCreationDate';
 
     /**
      * @covers ::mapField
@@ -58,9 +57,9 @@ class DateTimeFieldMapperTest extends BaseFieldMapperTest
         $output = new Exif;
         $mapper = new $this->fieldMapperClass();
 
-        $originalData = $output->getCreationDate();
+        $originalData = $output->{$this->outputAccessor}();
         $mapper->mapField($field, $this->validInput, $output);
-        $newData = $output->getCreationDate();
+        $newData = $output->{$this->outputAccessor}();
 
         $this->assertNotSame($originalData, $newData);
 
@@ -98,9 +97,9 @@ class DateTimeFieldMapperTest extends BaseFieldMapperTest
 
             $newKey = $keys[0];
 
-            $originalData = $output->getCreationDate();
+            $originalData = $output->{$this->outputAccessor}();
             $mapper->mapField($field, $this->validInput, $output);
-            $newData = $output->getCreationDate();
+            $newData = $output->{$this->outputAccessor}();
 
             $this->assertNotSame($originalData, $newData);
 
@@ -114,38 +113,5 @@ class DateTimeFieldMapperTest extends BaseFieldMapperTest
                 $newData->format('Y-m-d H:i:s')
             );
         }
-    }
-
-    /**
-     * @covers ::getValidKeys
-     * @group mapper
-     *
-     * @return void
-     */
-    public function testGetValidKeysReturnsArray()
-    {
-        $mapper = new $this->fieldMapperClass();
-        $this->assertInternalType(
-            'array',
-            $mapper->getValidKeys()
-        );
-    }
-
-    /**
-     * @covers ::setValidKeys
-     * @group mapper
-     *
-     * @return void
-     */
-    public function testSetValidKeysSetsCorrectData()
-    {
-        $mapper = new $this->fieldMapperClass();
-        $data = [
-            'foo', 'bar', 'baz',
-        ];
-
-        $this->assertNotEquals($data, $mapper->getValidKeys());
-        $mapper->setValidKeys($data);
-        $this->assertEquals($data, $mapper->getValidKeys());
     }
 }

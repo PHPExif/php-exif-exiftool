@@ -20,11 +20,12 @@ use PHPExif\Common\Mapper\GuardInvalidArgumentsForExifTrait;
  * Mapper
  *
  * @category    PHPExif
- * @package     Common
+ * @package     Exiftool
  */
 class ExposureTimeFieldMapper implements FieldMapper
 {
     use GuardInvalidArgumentsForExifTrait;
+    use ValidKeysTrait;
 
     /**
      * @var array
@@ -33,26 +34,6 @@ class ExposureTimeFieldMapper implements FieldMapper
         'exififd:exposuretime',
         'composite:shutterspeed',
     ];
-
-    /**
-     * Getter for validKeys
-     *
-     * @return array
-     */
-    public function getValidKeys()
-    {
-        return $this->validKeys;
-    }
-
-    /**
-     * Setter for validKeys
-     *
-     * @param array $validKeys
-     */
-    public function setValidKeys(array $validKeys)
-    {
-        $this->validKeys = $validKeys;
-    }
 
     /**
      * {@inheritDoc}
